@@ -29,16 +29,30 @@
     
         
 <body>
+<body>
   <!-- Jumping Block Spiel für PC & Handy -->
 <div id="gameArea" style="position:relative; width:500px; height:200px; border:2px solid black; margin:20px auto; overflow:hidden; background:#cceeff;">
-  <div id="player" style="width:30px; height:30px; background:red; position:absolute; bottom:0; left:50px; border-radius:5px;"></div>
-  <div id="obstacle" style="width:20px; height:40px; background:black; position:absolute; bottom:0; right:0; border-radius:3px;"></div>
-  <div id="powerUp" style="width:20px; height:20px; background:gold; position:absolute; border-radius:50%; display:none;"></div>
+  <div id="player" style="width:30px; height:30px; background:red; position:absolute; bottom:0; left:50px; border-radius:5px; box-shadow:0 0 10px red;"></div>
+  <div id="obstacle" style="width:20px; height:40px; background:black; position:absolute; bottom:0; right:0; border-radius:3px; box-shadow:0 0 10px black;"></div>
+  <div id="powerUp" style="width:20px; height:20px; background:gold; position:absolute; border-radius:50%; display:none; box-shadow:0 0 10px gold; animation: spin 1s linear infinite;"></div>
 </div>
 
 <p style="text-align:center;">Punkte: <span id="score">0</span></p>
 <p style="text-align:center;" id="gameOverMsg"></p>
 <p style="text-align:center; font-size:14px; color:gray;">PC: Leertaste | Handy: Tippen zum Springen</p>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes jumpGlow {
+    0% { box-shadow:0 0 10px red; }
+    50% { box-shadow:0 0 25px yellow; }
+    100% { box-shadow:0 0 10px red; }
+  }
+</style>
 
 <script>
 const player = document.getElementById("player");
@@ -53,9 +67,33 @@ let score = 0;
 let gameOver = false;
 let obstacleSpeed = 5;
 
+// Partikel Effekt beim Sprung
+function createParticles() {
+  const particle = document.createElement("div");
+  particle.style.width = particle.style.height = Math.random()*8 + "px";
+  particle.style.background = "yellow";
+  particle.style.position = "absolute";
+  particle.style.left = 50 + Math.random()*30 + "px";
+  particle.style.bottom = playerBottom + "px";
+  particle.style.borderRadius = "50%";
+  particle.style.opacity = 1;
+  gameArea.appendChild(particle);
+
+  let particleInterval = setInterval(() => {
+    particle.style.bottom = parseFloat(particle.style.bottom) + 2 + "px";
+    particle.style.opacity -= 0.05;
+    if(parseFloat(particle.style.opacity) <= 0){
+      clearInterval(particleInterval);
+      particle.remove();
+    }
+  }, 20);
+}
+
 function jump() {
   if (isJumping || gameOver) return;
   isJumping = true;
+  player.style.animation = "jumpGlow 0.4s";
+  createParticles();
   let upInterval = setInterval(() => {
     if (playerBottom >= 80) {
       clearInterval(upInterval);
@@ -63,6 +101,7 @@ function jump() {
         if (playerBottom <= 0) {
           clearInterval(downInterval);
           isJumping = false;
+          player.style.animation = "";
         }
         playerBottom -= 5;
         player.style.bottom = playerBottom + "px";
@@ -136,89 +175,7 @@ function moveObstacle() {
 
 moveObstacle();
 </script>
-
 </body>
-<body>
-  <style>
-  #fallPlayer {
-    transition: transform 0.1s; /* Smooth Bounce bei Bewegung */
-    box-shadow: 0 0 10px red; /* Glow-Effekt */
-  }
-  .obstacle {
-    border-radius: 5px;
-    box-shadow: 0 0 8px black; /* Glow-Effekt */
-    transition: transform 0.2s; /* Rotation smooth */
-  }
-  #fallScore {
-    transition: color 0.2s;
-  }
-</style>
-
-<script>
-function movePlayer(direction) {
-  if (fallGameOver) return;
-  if (direction === "left") playerLeft = Math.max(0, playerLeft - 20);
-  if (direction === "right") playerLeft = Math.min(fallGame.clientWidth - fallPlayer.clientWidth, playerLeft + 20);
-  fallPlayer.style.left = playerLeft + "px";
-  // Bounce Effekt
-  fallPlayer.style.transform = "translateY(-5px)";
-  setTimeout(() => { fallPlayer.style.transform = "translateY(0)"; }, 100);
-}
-
-function createObstacle() {
-  if (fallGameOver) return;
-  const obstacle = document.createElement("div");
-  obstacle.classList.add("obstacle"); // Klasse für Glow & Effekte
-  const size = Math.floor(Math.random() * 30) + 20;
-  obstacle.style.width = size + "px";
-  obstacle.style.height = size + "px";
-  obstacle.style.background = "#000";
-  obstacle.style.position = "absolute";
-  obstacle.style.top = "0px";
-  const maxX = fallGame.clientWidth - size;
-  const obsLeft = Math.floor(Math.random() * maxX);
-  obstacle.style.left = obsLeft + "px";
-  fallGame.appendChild(obstacle);
-
-  let obsTop = 0;
-  const fallSpeed = 3 + Math.random() * 2;
-  const obsInterval = setInterval(() => {
-    if (fallGameOver) {
-      clearInterval(obsInterval);
-      return;
-    }
-    obsTop += fallSpeed;
-    obstacle.style.top = obsTop + "px";
-    // Rotationseffekt
-    obstacle.style.transform = `rotate(${obsTop}deg)`;
-
-    // Kollision prüfen
-    const playerTop = fallGame.clientHeight - fallPlayer.clientHeight;
-    if (obsTop + size >= playerTop &&
-        obsTop <= playerTop + fallPlayer.clientHeight &&
-        obsLeft + size >= playerLeft &&
-        obsLeft <= playerLeft + fallPlayer.clientWidth) {
-      fallGameOver = true;
-      alert("Game Over! Punkte: " + fallScore);
-    }
-
-    if (obsTop > fallGame.clientHeight) {
-      clearInterval(obsInterval);
-      fallGame.removeChild(obstacle);
-      if (!fallGameOver) {
-        fallScore++;
-        const scoreEl = document.getElementById("fallScore");
-        scoreEl.textContent = fallScore;
-        // Punkt Blink-Effekt
-        scoreEl.style.color = "gold";
-        setTimeout(() => { scoreEl.style.color = "black"; }, 150);
-      }
-    }
-  }, 20);
-
-  setTimeout(createObstacle, 1500 + Math.random() * 1000);
-}
-</script>
 
 </body>
 
