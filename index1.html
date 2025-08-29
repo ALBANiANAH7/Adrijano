@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adrijano</title>
+    <style>               body {height: 100vh;
+        background: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(0, 255, 208)); font-family: cursive; text-align: center;}
+        h1 {text-align: center; text-decoration-line: underline; }
+        h2 {text-align: center;}
+        button:hover {transform: scale(1.10);}
+        button:active {
+  transform: scale(0.95);  box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+         
+    </style>
+</head>
+<body>
+    <h1>Adrijans Website</h1>
+    <h2>Hallo, willkomen auf meiner Website. <br> Wie geht es dir?
+    </h2>
+    <body>
+        <button style="background: chartreuse;color: black;padding: 12px 25px; border: none; border-radius: 10px;font-size: 18px;cursor: pointer;
+         transition: 0.3s;font-family: cursive;">Mir geht es gut.</button><p></p>
+        <button  style=
+         "background: rgb(255, 75, 75); color:rgb(0, 0, 0);padding: 12px 25px; border: none; border-radius: 10px;font-size: 18px;cursor: pointer;
+         transition: 0.3s;font-family: cursive;"    >Mir geht es nicht gut.</button>
+
+    </body>
+    
+        
+<body>
+  <!-- Jumping Block Spiel für PC & Handy -->
+<div id="gameArea" style="position:relative; width:500px; height:200px; border:2px solid black; margin:20px auto; overflow:hidden; background:#cceeff;">
+  <div id="player" style="width:30px; height:30px; background:red; position:absolute; bottom:0; left:50px; border-radius:5px;"></div>
+  <div id="obstacle" style="width:20px; height:40px; background:black; position:absolute; bottom:0; right:0; border-radius:3px;"></div>
+  <div id="powerUp" style="width:20px; height:20px; background:gold; position:absolute; border-radius:50%; display:none;"></div>
+</div>
+
+<p style="text-align:center;">Punkte: <span id="score">0</span></p>
+<p style="text-align:center;" id="gameOverMsg"></p>
+<p style="text-align:center; font-size:14px; color:gray;">PC: Leertaste | Handy: Tippen zum Springen</p>
+
+<script>
+const player = document.getElementById("player");
+const obstacle = document.getElementById("obstacle");
+const powerUp = document.getElementById("powerUp");
+const scoreDisplay = document.getElementById("score");
+const gameOverMsg = document.getElementById("gameOverMsg");
+
+let isJumping = false;
+let playerBottom = 0;
+let score = 0;
+let gameOver = false;
+let obstacleSpeed = 5;
+
+function jump() {
+  if (isJumping || gameOver) return;
+  isJumping = true;
+  let upInterval = setInterval(() => {
+    if (playerBottom >= 80) {
+      clearInterval(upInterval);
+      let downInterval = setInterval(() => {
+        if (playerBottom <= 0) {
+          clearInterval(downInterval);
+          isJumping = false;
+        }
+        playerBottom -= 5;
+        player.style.bottom = playerBottom + "px";
+      }, 20);
+    }
+    playerBottom += 5;
+    player.style.bottom = playerBottom + "px";
+  }, 20);
+}
+
+// PC: Leertaste
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") jump();
+});
+
+// Handy: Tippen auf Spielbereich
+document.getElementById("gameArea").addEventListener("touchstart", jump);
+
+function randomPowerUp() {
+  if (gameOver) return;
+  powerUp.style.display = "block";
+  const maxX = 480;
+  const maxY = 150;
+  powerUp.style.left = Math.floor(Math.random() * maxX) + "px";
+  powerUp.style.top = Math.floor(Math.random() * maxY) + "px";
+
+  setTimeout(() => {
+    powerUp.style.display = "none";
+  }, 5000);
+}
+
+function moveObstacle() {
+  let obstacleLeft = 500;
+  const obstacleInterval = setInterval(() => {
+    if (gameOver) {
+      clearInterval(obstacleInterval);
+      return;
+    }
+    obstacleLeft -= obstacleSpeed;
+    obstacle.style.left = obstacleLeft + "px";
+
+    // Kollision prüfen
+    if (obstacleLeft < 80 && obstacleLeft > 50 && playerBottom < 40) {
+      gameOverMsg.textContent = "💀 Game Over! Reload die Seite um neu zu starten.";
+      gameOver = true;
+    }
+
+    // Punkt & Geschwindigkeit erhöhen
+    if (obstacleLeft <= 0) {
+      score++;
+      scoreDisplay.textContent = score;
+      obstacleLeft = 500;
+      obstacleSpeed += 0.2;
+      if (Math.random() < 0.3) randomPowerUp();
+    }
+
+    // PowerUp Kollision
+    const powerLeft = parseInt(powerUp.style.left || 0);
+    const powerTop = parseInt(powerUp.style.top || 0);
+    if (powerUp.style.display === "block" &&
+        playerBottom < powerTop + 20 &&
+        playerBottom + 30 > powerTop &&
+        50 < powerLeft + 20 &&
+        50 + 30 > powerLeft) {
+      score += 3;
+      scoreDisplay.textContent = score;
+      powerUp.style.display = "none";
+    }
+  }, 20);
+}
+
+moveObstacle();
+</script>
+
+</body>
+<body>
+  <style>
+  #fallPlayer {
+    transition: transform 0.1s; /* Smooth Bounce bei Bewegung */
+    box-shadow: 0 0 10px red; /* Glow-Effekt */
+  }
+  .obstacle {
+    border-radius: 5px;
+    box-shadow: 0 0 8px black; /* Glow-Effekt */
+    transition: transform 0.2s; /* Rotation smooth */
+  }
+  #fallScore {
+    transition: color 0.2s;
+  }
+</style>
+
+<script>
+function movePlayer(direction) {
+  if (fallGameOver) return;
+  if (direction === "left") playerLeft = Math.max(0, playerLeft - 20);
+  if (direction === "right") playerLeft = Math.min(fallGame.clientWidth - fallPlayer.clientWidth, playerLeft + 20);
+  fallPlayer.style.left = playerLeft + "px";
+  // Bounce Effekt
+  fallPlayer.style.transform = "translateY(-5px)";
+  setTimeout(() => { fallPlayer.style.transform = "translateY(0)"; }, 100);
+}
+
+function createObstacle() {
+  if (fallGameOver) return;
+  const obstacle = document.createElement("div");
+  obstacle.classList.add("obstacle"); // Klasse für Glow & Effekte
+  const size = Math.floor(Math.random() * 30) + 20;
+  obstacle.style.width = size + "px";
+  obstacle.style.height = size + "px";
+  obstacle.style.background = "#000";
+  obstacle.style.position = "absolute";
+  obstacle.style.top = "0px";
+  const maxX = fallGame.clientWidth - size;
+  const obsLeft = Math.floor(Math.random() * maxX);
+  obstacle.style.left = obsLeft + "px";
+  fallGame.appendChild(obstacle);
+
+  let obsTop = 0;
+  const fallSpeed = 3 + Math.random() * 2;
+  const obsInterval = setInterval(() => {
+    if (fallGameOver) {
+      clearInterval(obsInterval);
+      return;
+    }
+    obsTop += fallSpeed;
+    obstacle.style.top = obsTop + "px";
+    // Rotationseffekt
+    obstacle.style.transform = `rotate(${obsTop}deg)`;
+
+    // Kollision prüfen
+    const playerTop = fallGame.clientHeight - fallPlayer.clientHeight;
+    if (obsTop + size >= playerTop &&
+        obsTop <= playerTop + fallPlayer.clientHeight &&
+        obsLeft + size >= playerLeft &&
+        obsLeft <= playerLeft + fallPlayer.clientWidth) {
+      fallGameOver = true;
+      alert("Game Over! Punkte: " + fallScore);
+    }
+
+    if (obsTop > fallGame.clientHeight) {
+      clearInterval(obsInterval);
+      fallGame.removeChild(obstacle);
+      if (!fallGameOver) {
+        fallScore++;
+        const scoreEl = document.getElementById("fallScore");
+        scoreEl.textContent = fallScore;
+        // Punkt Blink-Effekt
+        scoreEl.style.color = "gold";
+        setTimeout(() => { scoreEl.style.color = "black"; }, 150);
+      }
+    }
+  }, 20);
+
+  setTimeout(createObstacle, 1500 + Math.random() * 1000);
+}
+</script>
+
+</body>
+
+<body>
+  <!-- Snake Spiel -->
+<h2>Snake Spiel</h2>
+<canvas id="snakeGame" width="400" height="400" style="border:2px solid black; background:#c8e6c9; display:block; margin:20px auto;"></canvas>
+<p style="text-align:center;">Snake Punkte: <span id="snakeScore">0</span></p>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const canvas = document.getElementById("snakeGame");
+  const ctx = canvas.getContext("2d");
+  const box = 20; // Größe der Snake-Segmente
+  let snake = [{x: 8*box, y: 8*box}];
+  let direction = null;
+  let food = {
+    x: Math.floor(Math.random()*20)*box,
+    y: Math.floor(Math.random()*20)*box
+  };
+  let score = 0;
+  const scoreEl = document.getElementById("snakeScore");
+
+  // Steuerung für PC
+  document.addEventListener("keydown", e => {
+    if (e.code === "ArrowUp" && direction !== "DOWN") direction = "UP";
+    if (e.code === "ArrowDown" && direction !== "UP") direction = "DOWN";
+    if (e.code === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+    if (e.code === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+  });
+
+  // Steuerung für Handy (Tippen oben/unten/links/rechts)
+  let touchStartX = 0;
+  let touchStartY = 0;
+  canvas.addEventListener("touchstart", e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  });
+  canvas.addEventListener("touchend", e => {
+    let touchEndX = e.changedTouches[0].clientX;
+    let touchEndY = e.changedTouches[0].clientY;
+    let dx = touchEndX - touchStartX;
+    let dy = touchEndY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0 && direction !== "LEFT") direction = "RIGHT";
+      else if (dx < 0 && direction !== "RIGHT") direction = "LEFT";
+    } else {
+      if (dy > 0 && direction !== "UP") direction = "DOWN";
+      else if (dy < 0 && direction !== "DOWN") direction = "UP";
+    }
+  });
+
+  function draw() {
+    ctx.fillStyle = "#c8e6c9";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Snake zeichnen
+    for (let i=0; i<snake.length; i++) {
+      ctx.fillStyle = i===0 ? "green" : "darkgreen";
+      ctx.fillRect(snake[i].x, snake[i].y, box, box);
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    // Food zeichnen
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    // Snake bewegen
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
+
+    if (direction === "LEFT") snakeX -= box;
+    if (direction === "RIGHT") snakeX += box;
+    if (direction === "UP") snakeY -= box;
+    if (direction === "DOWN") snakeY += box;
+
+    // Food essen
+    if (snakeX === food.x && snakeY === food.y) {
+      score++;
+      scoreEl.textContent = score;
+      food = {
+        x: Math.floor(Math.random()*20)*box,
+        y: Math.floor(Math.random()*20)*box
+      };
+    } else {
+      snake.pop();
+    }
+
+    // Neue Kopfposition
+    let newHead = {x: snakeX, y: snakeY};
+
+    // Game Over Bedingungen
+    if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+      alert("Game Over! Punkte: " + score);
+      snake = [{x: 8*box, y: 8*box}];
+      direction = null;
+      score = 0;
+      scoreEl.textContent = score;
+      food = {x: Math.floor(Math.random()*20)*box, y: Math.floor(Math.random()*20)*box};
+      return;
+    }
+
+    snake.unshift(newHead);
+  }
+
+  setInterval(draw, 150); // Spielgeschwindigkeit
+});
+</script>
+
+</body>
+   
+
+
+    </body>
+</body>
+</html>
